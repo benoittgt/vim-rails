@@ -372,8 +372,6 @@ function! s:readable_controller_name(...) dict abort
     return s:sub(f,'.*<app/apis/(.{-})_api\.rb$','\1')
   elseif f =~ '\<test/\%(functional\|controllers\)/.*_test\.rb$'
     return s:sub(f,'.*<test/%(functional|controllers)/(.{-})%(_controller)=_test\.rb$','\1')
-  elseif f =~ '\<test/\%(unit/\)\?helpers/.*_helper_test\.rb$'
-    return s:sub(f,'.*<test/%(unit/)?helpers/(.{-})_helper_test\.rb$','\1')
   elseif f =~ '\<spec/controllers/.*_spec\.rb$'
     return s:sub(f,'.*<spec/controllers/(.{-})%(_controller)=_spec\.rb$','\1')
   elseif f =~ '\<spec/helpers/.*_helper_spec\.rb$'
@@ -382,6 +380,8 @@ function! s:readable_controller_name(...) dict abort
     return s:sub(f,'.*<spec/views/(.{-})/\w+_view_spec\.rb$','\1')
   elseif f =~ '\<app/models/.*\.rb$' && self.type_name('mailer')
     return s:sub(f,'.*<app/models/(.{-})\.rb$','\1')
+  elseif f =~ '\<test/\%(unit/\)\?helpers/.*_helper_test\.rb$'
+    return s:sub(f,'.*<test/%(unit/)?helpers/(.{-})_helper_test\.rb$','\1')
   elseif f =~ '\<\%(public\|app/assets\)/stylesheets/.*\.css\%(\.\w\+\)\=$'
     return s:sub(f,'.*<%(public|app/assets)/stylesheets/(.{-})\.css%(\.\w+)=$','\1')
   elseif f =~ '\<\%(public\|app/assets\)/javascripts/.*\.js\%(\.\w\+\)\=$'
@@ -411,10 +411,6 @@ function! s:readable_model_name(...) dict abort
     return s:sub(f,'.*<app/models/(.*)_observer\.rb$','\1')
   elseif f =~ '\<app/models/.*\.rb$'
     return s:sub(f,'.*<app/models/(.*)\.rb$','\1')
-  elseif f =~ '\<test/\%(unit\|models\)/.*_observer_test\.rb$'
-    return s:sub(f,'.*<test/unit/(.*)_observer_test\.rb$','\1')
-  elseif f =~ '\<test/\%(unit\|models\)/.*_test\.rb$'
-    return s:sub(f,'.*<test/%(unit|models)/(.*)_test\.rb$','\1')
   elseif f =~ '\<spec/models/.*_spec\.rb$'
     return s:sub(f,'.*<spec/models/(.*)_spec\.rb$','\1')
   elseif f =~ '\<\%(test\|spec\)/blueprints/.*\.rb$'
@@ -427,6 +423,10 @@ function! s:readable_model_name(...) dict abort
     return s:sub(f,'.*<%(test/|spec/)=fabricators/(.{-})_fabricator.rb$','\1')
   elseif f =~ '\<\%(test\|spec\)/\%(fixtures\|factories\|fabricators\)/.*\.\w\+$'
     return rails#singularize(s:sub(f,'.*<%(test|spec)/\w+/(.*)\.\w+$','\1'))
+  elseif f =~ '\<test/\%(unit\|models\)/.*_observer_test\.rb$'
+    return s:sub(f,'.*<test/unit/(.*)_observer_test\.rb$','\1')
+  elseif f =~ '\<test/\%(unit\|models\)/.*_test\.rb$'
+    return s:sub(f,'.*<test/%(unit|models)/(.*)_test\.rb$','\1')
   elseif a:0 && a:1
     return rails#singularize(self.controller_name())
   endif
@@ -747,6 +747,14 @@ function! s:readable_calculate_file_type() dict abort
     let r = "view-layout-" . e
   elseif f =~ '\<app/views\>.*\.'
     let r = "view-" . e
+  elseif f =~ '\<spec/lib/.*_spec\.rb$'
+    let r = 'spec-lib'
+  elseif f =~ '\<lib/.*\.rb$'
+    let r = 'lib'
+  elseif f =~ '\<spec/\w*s/.*_spec\.rb$'
+    let r = s:sub(f,'.*<spec/(\w*)s/.*','spec-\1')
+  elseif f =~ '\<features/.*\.feature$'
+    let r = 'cucumber-feature'
   elseif f =~ '\<test/\%(unit\|models\|helpers\)/.*_test\.rb$'
     let r = "test-unit"
   elseif f =~ '\<test/\%(functional\|controllers\)/.*_test\.rb$'
@@ -759,14 +767,6 @@ function! s:readable_calculate_file_type() dict abort
     let r = s:sub(f,'.*<test/(\w*)s/.*','test-\1')
   elseif f =~ '\<test/.*_test\.rb'
     let r = "test"
-  elseif f =~ '\<spec/lib/.*_spec\.rb$'
-    let r = 'spec-lib'
-  elseif f =~ '\<lib/.*\.rb$'
-    let r = 'lib'
-  elseif f =~ '\<spec/\w*s/.*_spec\.rb$'
-    let r = s:sub(f,'.*<spec/(\w*)s/.*','spec-\1')
-  elseif f =~ '\<features/.*\.feature$'
-    let r = 'cucumber-feature'
   elseif f =~ '\<features/step_definitions/.*_steps\.rb$'
     let r = 'cucumber-steps'
   elseif f =~ '\<features/.*\.rb$'
